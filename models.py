@@ -6,6 +6,9 @@ class Title(models.Model):
     hiragana = models.CharField(max_length=50)
     romanji = models.CharField(max_length=50)
 
+    def __str__(self):
+        return f"{self.kanji} ({self.romanji})"
+
 
 class Book(models.Model):
     ASPECT_CHOICES = [
@@ -24,6 +27,9 @@ class Book(models.Model):
     pages_per_scan = models.PositiveSmallIntegerField()
     aspect = models.CharField(max_length=2, choices=ASPECT_CHOICES)
     nr_scans = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.id}/{self.original_id} ({self.nr_scans} scans)"
 
 
 class Page(models.Model):

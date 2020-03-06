@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Titles</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        Titles
+      </h1>
+      <table class="table" id="table">
+        <thead>
+          <tr>
+            <td>Bukan Title</td>
+            <td>in Hiragana</td>
+            <td>in Romanji</td>
+            <td>Number of Books</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for title in title_list %}
+          <tr>
+            <td><a href="{% url 'books' title.id %}">{{ title.kanji }}</a></td>
+            <td>{{ title.hiragana }}</td>
+            <td>{{ title.romanji  }}</td>
+            <td>{{ title.nr_books }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  </body>
+</html>
