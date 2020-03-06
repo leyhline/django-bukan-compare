@@ -6,28 +6,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Book Prints</title>
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+    <script>
+      let headBox = undefined
+      let bookCheckboxes = []
+
+      function headBoxChecked() {
+        if (headBox.checked === false) {
+          bookCheckboxes.forEach(cb => {cb.checked = false; cb.disabled = false})
+        }
+      }
+
+      function compareBooks() {
+        const checked = bookCheckboxes.filter(cb => {return cb.checked === true})
+        if (checked.length > 0) {
+          headBox.checked = true
+          if (checked.length > 1) {
+            const unchecked = bookCheckboxes.filter(cb => {return cb.checked === false})
+            unchecked.forEach(cb => {cb.disabled = true})
+          }
+        } else {
+          headBox.checked = false
+          bookCheckboxes.forEach(cb => {cb.disabled = false})
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        headBox = document.getElementById('bx')
+        headBox.onclick = headBoxChecked
+        headBox.checked = false
+        bookCheckboxes = Array.from(document.getElementsByClassName('cb-book'))
+        bookCheckboxes.forEach(cb => {cb.onclick = compareBooks; cb.checked = false})}, false)
+    </script>
   </head>
   <body>
   <section class="section">
     <div class="container">
       <h1 class="title">
-        Book Prints
+        Book Prints: {{ title }}
       </h1>
       <table class="table" id="table">
         <thead>
           <tr>
-            <td \>
-            <td>ID</td>
-            <td>Original ID</td>
-            <td>Scans</td>
+            <th><input type="checkbox" id="bx" name="bx"></th>
+            <th>ID</th>
+            <th>Original ID</th>
+            <th>Released</th>
+            <th>Classification</th>
+            <th colspan="2">Published</th>
+            <th>Aspect</th>
+            <th>Scans</th>
           </tr>
         </thead>
         <tbody>
-          {% for book in book_list %}
+          {% for book in title.book_set.all %}
           <tr>
-            <td><input type="checkbox"></td>
-            <td>{{ book.id }}</a></td>
+            <td><input type="checkbox" id="b{{ book.id }}" name="b{{book.id}}" class="cb-book"></td>
+            <td><a href="{% url 'pages' book.id %}">{{ book.id }}</a></td>
             <td>{{ book.original_id }}</td>
+            <td>{{ book.released }}</td>
+            <td>{{ book.classification }}</td>
+            <td>{{ book.published }}</td>
+            <td>{{ book.published_ad }}</td>
+            <td>{{ book.aspect }}</td>
             <td>{{ book.nr_scans }}</td>
           </tr>
           {% endfor %}
