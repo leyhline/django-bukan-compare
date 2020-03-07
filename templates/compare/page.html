@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        Page: {{ page.page }} {{ page.get_lr_display }}
+      </h1>
+      <div style="float: right;">
+        {% for page_id, nr_matches in matching %}
+        <p><a href="{% url 'page' page_id %}">Page {{ page_id }}</a> ({{ nr_matches }} matching keypoints)</p>
+        {% endfor %}
+      </div>
+      <div>
+        <img src="{% static 'images/'|add:filename %}"> 
+      </div>
+    </div>
+  </section>
+  </body>
+</html>

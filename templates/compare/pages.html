@@ -13,11 +13,18 @@
       <h1 class="title">
         Book Pages: {{ book }}
       </h1>
-      <div>
-        {% for image in images %}
-          <a href="{% static 'images/'|add:image %}"><img src="{% static 'thumbs/'|add:image %}"></a>
-        {% endfor %}
-      </div>
+      {% for filename, page in images %}
+        <div style="display: inline-block;">
+          <figure>
+            <a href="{% static 'images/'|add:filename %}"><img src="{% static 'thumbs/'|add:filename %}"></a>
+            {% if page %}
+            <figcaption><a href="{% url 'page' page.id %}">{{ page.page }} {{ page.get_lr_display }}</a> ({{ page.keypoint_set.count }})</figcaption>
+            {% else %}
+            <figcaption>No match</figcaption>
+            {% endif %}
+          </figure>
+        </div>
+      {% endfor %}
     </div>
   </section>
   </body>
