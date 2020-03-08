@@ -23,6 +23,7 @@
   </nav>
   <section class="section">
     <div class="container">
+        <p><a href="http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages={{ page.book_id }}&pos={{ page.page }}" target="_blank">IIIF Curation Viewer: {{ page.book_id }}-{{ page.page }}</a></p>
       <div style="float: right;">
         <form>
           {% for page_id, nr_matches in matching %}
