@@ -11,6 +11,7 @@ import numpy as np
 
 
 PAGE_FILENAME_TEMPLATE = "{book_id}/{book_id}_{page:0>5}_{lr}.jpg"
+THRESHOLD_NR_KEYPOINTS = 20
 
 
 class TitleList(generic.ListView):
@@ -52,6 +53,24 @@ class BookPagesView(generic.DetailView):
         return context
 
 
+def get_matching_pages(page: Page):
+    """Returns a QuerySet of tuples with (matching_page_id, keypoint_count)"""
+    src_to_dst = (page.keypoint_set
+        .values_list('match_src__dst_keypoint__page')
+        .distinct()
+        .exclude(match_src__dst_keypoint__page=None)
+        .annotate(count=Count('match_src'))
+        .filter(count__gt=THRESHOLD_NR_KEYPOINTS))
+    dst_to_src = (page.keypoint_set
+        .values_list('match_dst__src_keypoint__page')
+        .distinct()
+        .exclude(match_dst__src_keypoint__page=None)
+        .annotate(count=Count('match_dst'))
+        .filter(count__gt=THRESHOLD_NR_KEYPOINTS))
+    union = src_to_dst.union(dst_to_src).order_by('-count')
+    return union
+
+
 class PageView(generic.DetailView):
     template_name = 'compare/page.html'
     model = Page
@@ -59,21 +78,18 @@ class PageView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         page = super().get_object()
-        src_to_dst = (page.keypoint_set
-            .values_list('match_src__dst_keypoint__page')
-            .distinct()
-            .exclude(match_src__dst_keypoint__page=None)
-            .annotate(count=Count('match_src'))
-            .filter(count__gt=20))
-        dst_to_src = (page.keypoint_set
-            .values_list('match_dst__src_keypoint__page')
-            .distinct()
-            .exclude(match_dst__src_keypoint__page=None)
-            .annotate(count=Count('match_dst'))
-            .filter(count__gt=20))
-        union = src_to_dst.union(dst_to_src).order_by('-count')
-        context['matching'] = union
+        matches = get_matching_pages(page)
+        context['matching'] = [(Page.objects.get(id=page_id), count) for page_id, count in matches]
         context['filename'] = PAGE_FILENAME_TEMPLATE.format(book_id=page.book_id, page=page.page, lr=page.lr)
+        book_pages = Page.objects.filter(book=page.book)
+        try:
+            context['previous'] = book_pages.get(id=page.id-1)
+        except Page.DoesNotExist:
+            context['previous'] = None
+        try:
+            context['next'] = book_pages.get(id=page.id+1)
+        except Page.DoesNotExist:
+            context['next'] = None
         return context
 
 

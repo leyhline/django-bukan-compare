@@ -22,24 +22,44 @@
       <a href="{% url 'page' page.id %}" class="navbar-item">PAGE {{ page.page }} {{ page.get_lr_display }}</a>
     </div>
   </nav>
-  <section class="section">
-    <div class="container">
-        <p><a href="http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages={{ page.book_id }}&pos={{ page.page }}" target="_blank">IIIF Curation Viewer: {{ page.book_id }}-{{ page.page }}</a></p>
-      <div style="float: right;">
-        <form>
-          {% for page_id, nr_matches in matching %}
-          <label class="radio"><input type="radio" name="match" value="{{ page_id }}">
-            <a href="{% url 'page' page_id %}" class="{% if nr_matches < 40%}has-text-grey{% endif %}">Page {{ page_id }} ({{ nr_matches }})</a>
-          </label><br>
-          {% endfor %}
-        </form>
+      <div class="columns is-vcentered is-gapless">
+        <div class="column">
+          {% if next %}
+          <a href="{% url 'page' next.id %}" class="button is-link is-light is-pulled-right">ᐸ</a>
+          {% else %}
+          <a class="button is-link is-light is-pulled-right" disabled>ᐸ</a>
+          {% endif %}
+        </div>
+        <div class="column">
+          <div class="columns is-gapless is-marginless">
+            <div class="column"><a id="sourcelink" class="is-pulled-left" href="http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages={{ page.book_id }}&pos={{ page.page }}" target="_blank">IIIF: {{ page.book_id }}-{{ page.page }}</a></div>
+            <div class="column is-1">➠</div>
+            <div class="column"><a id="targetlink" class="is-pulled-right" target="_blank"></a></div>
+          </div>
+          <canvas id="overlay" width="{% if page.lr == 0 %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: medium solid lightgrey;"></canvas>
+        </div>
+        <div class="column">
+          {% if previous %}
+          <a href="{% url 'page' previous.id %}" class="button is-link is-light is-pulled-left">ᐳ</a>
+          {% else %}
+          <a class="button is-link is-light is-pulled-left" disabled>ᐳ</a>
+          {% endif %}
+        </div>
+        <div class="column">
+          <form>
+            {% for page, nr_matches in matching %}
+            <label class="radio {% if nr_matches < 40%}has-text-grey{% endif %}">
+              <input type="radio" name="match" value="{{ page.id }},{{ page.book_id }},{{ page.page }}">
+              P. {{ page.page }} ({{ nr_matches }})
+              <a href="{% url 'page' page.id %}">▶</a>
+            </label><br>
+            {% endfor %}
+          </form>
+        </div>
       </div>
-      <canvas id="overlay" width="{% if page.lr == 0 %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: thick double grey;"></canvas>
-      <div>
-        <img src="{% static 'compare/images/'|add:filename %}" id="sourceimage" hidden>
-        <img src="" id="targetimage" hidden>
+      <div hidden>
+        <img src="{% static 'compare/images/'|add:filename %}" id="sourceimage">
+        <img src="" id="targetimage">
       </div>
-    </div>
-  </section>
   </body>
 </html>

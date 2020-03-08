@@ -18,7 +18,6 @@
       <a href="{% url 'pages' book.id %}" class="navbar-item"><ruby>{{ book.original_id }}<rt>{{ book.id }}</rt></ruby></a>
     </div>
   </nav>
-  <section class="section">
     <div class="container">
       {% for filename, page in images %}
       {% if page.lr == 0 %}
@@ -40,6 +39,5 @@
       </div>
       {% endfor %}
     </div>
-  </section>
   </body>
 </html>

@@ -89,12 +89,12 @@ function initOverlay(gl, canvas, sourceimage, targetimage) {
     canvas.onclick = () => {
         if (doUpdateCanvas) {
             doUpdateCanvas = false
-            canvas.style['border-style'] = 'solid'
+            canvas.style['border-style'] = 'dashed'
             canvas.style['border-color'] = 'blue'
         } else {
             doUpdateCanvas = true
-            canvas.style['border-style'] = 'double'
-            canvas.style['border-color'] = 'grey'
+            canvas.style['border-style'] = 'solid'
+            canvas.style['border-color'] = 'lightgrey'
         }
     }
     targetimage.onload = () => { updateOverlay(gl, targetimage, dstExists, colorRatio) }
@@ -161,18 +161,27 @@ function loadShader(gl, type, source) {
     return shader
 }
 
+function updateTargetResources(checkbox, targetimage, targetlink) {
+    if (checkbox.checked) {
+        const [targetId, targetBook, targetPage] = checkbox.value.split(',')
+        targetimage.src = "../match/" + pageId + "/" + targetId
+        targetlink.text = "IIIF: " + targetBook + "-" + targetPage
+        targetlink.href = "http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages=" + targetBook + "&pos=" + targetPage
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('overlay')
     const gl = canvas.getContext('webgl')
     const sourceimage = document.getElementById('sourceimage')
     const targetimage = document.getElementById('targetimage')
+    const targetlink = document.getElementById('targetlink')
     sourceimage.onload = () => { initOverlay(gl, canvas, sourceimage, targetimage) }
     const radioButtons = Array.from(document.getElementsByName('match'))
     radioButtons.forEach(button => {
+        updateTargetResources(button, targetimage, targetlink)
         button.onclick = (event) => {
-            if (event.target.checked === true) {
-                targetimage.src = "../match/" + pageId + "/" + event.target.value
-            }
+            updateTargetResources(event.target, targetimage, targetlink)
         }
     })
 }, false)
