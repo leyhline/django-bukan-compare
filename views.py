@@ -78,11 +78,14 @@ class PageView(generic.DetailView):
 def get_keypoints(src_page: Page, dst_page: Page):
     src_dst_matches = Match.objects.filter(src_keypoint__page=src_page).filter(dst_keypoint__page=dst_page)
     dst_src_matches = Match.objects.filter(src_keypoint__page=dst_page).filter(dst_keypoint__page=src_page)
-    assert (src_dst_matches.count() == 0) or (dst_src_matches.count() == 0)
-    if src_dst_matches.count != 0:
+    src_dst_count = src_dst_matches.count()
+    dst_src_count = dst_src_matches.count()
+    assert (src_dst_count == 0) or (dst_src_count == 0)
+    assert (src_dst_count > 0) or (dst_src_count > 0)
+    if src_dst_count != 0:
         return src_dst_matches.values_list('src_keypoint__x', 'src_keypoint__y', 'dst_keypoint__x', 'dst_keypoint__y')
     else:
-        return src_dst_matches.values_list('dst_keypoint__x', 'dst_keypoint__y', 'src_keypoint__x', 'src_keypoint__y')
+        return dst_src_matches.values_list('dst_keypoint__x', 'dst_keypoint__y', 'src_keypoint__x', 'src_keypoint__y')
 
 
 def matching_image(response, src_page_id, dst_page_id):
@@ -95,7 +98,7 @@ def matching_image(response, src_page_id, dst_page_id):
     homography, _ = cv.findHomography(keypoints[:,2:], keypoints[:,:2], 0)
     height, width = dst_image.shape
     dst_image_warped = cv.warpPerspective(dst_image, homography, (width, height))
-    enc_result, dst_image_warped_jpg = cv.imencode(".jpg", dst_image_warped, [cv.IMWRITE_JPEG_QUALITY, 80])
+    enc_result, dst_image_warped_jpg = cv.imencode(".jpg", dst_image_warped, [cv.IMWRITE_JPEG_QUALITY, 80, cv.IMWRITE_JPEG_OPTIMIZE, True])
     assert enc_result
     r = FileResponse(io.BytesIO(dst_image_warped_jpg))
     r['Content-Disposition'] = f'inline; filename="{dst_filename}"'

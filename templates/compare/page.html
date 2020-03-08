@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Page</title>
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+    <script>var pageId = {{ page.id }}</script>
+    <script src="{% static 'compare/overlay.js' %}"></script>
   </head>
   <body>
   <section class="section">
@@ -14,12 +16,18 @@
         Page: {{ page.page }} {{ page.get_lr_display }}
       </h1>
       <div style="float: right;">
-        {% for page_id, nr_matches in matching %}
-        <p><a href="{% url 'page' page_id %}">Page {{ page_id }}</a> ({{ nr_matches }} matching keypoints)</p>
-        {% endfor %}
+        <form>
+          {% for page_id, nr_matches in matching %}
+          <label class="radio"><input type="radio" name="match" value="{{ page_id }}">
+            <a href="{% url 'page' page_id %}">Page {{ page_id }}</a> ({{ nr_matches }} matching keypoints)
+          </label><br>
+          {% endfor %}
+        </form>
       </div>
+      <canvas id="overlay" width="{% if page.lr == 0 %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: thick double grey;"></canvas>
       <div>
-        <img src="{% static 'images/'|add:filename %}"> 
+        <img src="{% static 'images/'|add:filename %}" id="sourceimage" hidden>
+        <img src="" id="targetimage" hidden>
       </div>
     </div>
   </section>
