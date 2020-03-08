@@ -4,26 +4,38 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pages</title>
+    <title>武鑑 BUKAN: {{ book.original_id }}</title>
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
   </head>
   <body>
+  <nav class="navbar" role="navigation">
+    <div class="navbar-brand">
+      <a href="{% url 'titles' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
+      <span class="navbar-item">›</span>
+      <a href="{% url 'books' book.title.id %}" class="navbar-item"><ruby>{{ book.title.kanji }}<rt>{{ book.title.romanji|upper }}</rt></ruby></a>
+      <span class="navbar-item">›</span>
+      <a href="{% url 'pages' book.id %}" class="navbar-item"><ruby>{{ book.original_id }}<rt>{{ book.id }}</rt></ruby></a>
+    </div>
+  </nav>
   <section class="section">
     <div class="container">
-      <h1 class="title">
-        Book Pages: {{ book }}
-      </h1>
       {% for filename, page in images %}
-        <div style="display: inline-block;">
-          <figure>
-            <a href="{% static 'images/'|add:filename %}"><img src="{% static 'thumbs/'|add:filename %}"></a>
-            {% if page %}
-            <figcaption><a href="{% url 'page' page.id %}">{{ page.page }} {{ page.get_lr_display }}</a> ({{ page.keypoint_set.count }})</figcaption>
-            {% else %}
-            <figcaption>No match</figcaption>
-            {% endif %}
-          </figure>
-        </div>
+      {% if page.lr == 0 %}
+      <div style="width: 200px; height: 133px; display: inline-block;">
+      {% else %}
+      <div style="width: 150px; height: 200px; display: inline-block;">
+      {% endif %}
+        <figure class="image has-background-grey-light">
+          {% if page %}
+          <a href="{% url 'page' page.id %}">
+            <img src="{% static 'compare/thumbs/'|add:filename %}">
+            <figcaption style="position: absolute; top: 0; left: 0; padding: 2px 4px; background-color: rgba(255, 255, 255, 0.5);">{{ page.page }} {{ page.get_lr_display }}</figcaption>
+          </a>
+          {% else %}
+          <img src="{% static 'compare/thumbs/'|add:filename %}">
+          {% endif %}
+        </figure>
+      </div>
       {% endfor %}
     </div>
   </section>

@@ -4,15 +4,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Titles</title>
+    <title>武鑑 BUKAN</title>
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
   </head>
   <body>
+  <nav class="navbar" role="navigation">
+    <div class="navbar-brand">
+      <a href="{% url 'titles' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
+    </div>
+  </nav>
   <section class="section">
     <div class="container">
-      <h1 class="title">
-        Titles
-      </h1>
       <table class="table" id="table">
         <thead>
           <tr>

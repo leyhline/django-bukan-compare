@@ -34,9 +34,9 @@ class Book(models.Model):
 
 class Page(models.Model):
     LR_CHOICES = [
-        (0, 'whole'),
-        (1, 'right'),
-        (2, 'left')
+        (0, ''),
+        (1, '右'),
+        (2, '左')
     ]
 
     book = models.ForeignKey(Book, on_delete=models.PROTECT)

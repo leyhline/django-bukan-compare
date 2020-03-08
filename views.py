@@ -63,12 +63,14 @@ class PageView(generic.DetailView):
             .values_list('match_src__dst_keypoint__page')
             .distinct()
             .exclude(match_src__dst_keypoint__page=None)
-            .annotate(count=Count('match_src')))
+            .annotate(count=Count('match_src'))
+            .filter(count__gt=20))
         dst_to_src = (page.keypoint_set
             .values_list('match_dst__src_keypoint__page')
             .distinct()
             .exclude(match_dst__src_keypoint__page=None)
-            .annotate(count=Count('match_dst')))
+            .annotate(count=Count('match_dst'))
+            .filter(count__gt=20))
         union = src_to_dst.union(dst_to_src).order_by('-count')
         context['matching'] = union
         context['filename'] = PAGE_FILENAME_TEMPLATE.format(book_id=page.book_id, page=page.page, lr=page.lr)
@@ -88,20 +90,26 @@ def get_keypoints(src_page: Page, dst_page: Page):
         return dst_src_matches.values_list('dst_keypoint__x', 'dst_keypoint__y', 'src_keypoint__x', 'src_keypoint__y')
 
 
+def create_warped_jpeg(keypoints: np.ndarray, image: np.ndarray):
+    assert keypoints.shape[1] == 4
+    homography, _ = cv.findHomography(keypoints[:,2:], keypoints[:,:2], 0)
+    height, width = image.shape
+    image_warped = cv.warpPerspective(image, homography, (width, height))
+    encoding_status, image_jpeg = cv.imencode(".jpg", image_warped, [cv.IMWRITE_JPEG_QUALITY, 80, cv.IMWRITE_JPEG_OPTIMIZE, True])
+    assert encoding_status
+    return image_jpeg
+
+
 def matching_image(response, src_page_id, dst_page_id):
     src_page = Page.objects.get(pk=src_page_id)
     dst_page = Page.objects.get(pk=dst_page_id)
     dst_filename = PAGE_FILENAME_TEMPLATE.format(book_id=dst_page.book_id, page=dst_page.page, lr=dst_page.lr)
-    dst_path = finders.find('images/' + dst_filename)
+    dst_path = finders.find('compare/images/' + dst_filename)
     dst_image = cv.imread(dst_path, cv.IMREAD_GRAYSCALE)
     keypoints = np.array(get_keypoints(src_page, dst_page))
-    homography, _ = cv.findHomography(keypoints[:,2:], keypoints[:,:2], 0)
-    height, width = dst_image.shape
-    dst_image_warped = cv.warpPerspective(dst_image, homography, (width, height))
-    enc_result, dst_image_warped_jpg = cv.imencode(".jpg", dst_image_warped, [cv.IMWRITE_JPEG_QUALITY, 80, cv.IMWRITE_JPEG_OPTIMIZE, True])
-    assert enc_result
-    r = FileResponse(io.BytesIO(dst_image_warped_jpg))
+    dst_image_jpeg = create_warped_jpeg(keypoints, dst_image)
+    r = FileResponse(io.BytesIO(dst_image_jpeg))
     r['Content-Disposition'] = f'inline; filename="{dst_filename}"'
     r['Content-Type'] = 'image/jpeg'
-    r['Content-Length'] = len(dst_image_warped_jpg)
+    r['Content-Length'] = len(dst_image_jpeg)
     return r
