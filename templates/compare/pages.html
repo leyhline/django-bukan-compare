@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>武鑑 BUKAN: {{ book.original_id }}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
   </head>
   <body>
@@ -21,15 +22,16 @@
     <div class="container">
       {% for filename, page in images %}
       {% if page.lr == 0 %}
-      <div style="width: 200px; height: 133px; display: inline-block;">
+      <div class="has-background-grey-light" style="width: 240px; height: 160px; display: inline-block;">
+        <figure class="image is-3by2">
       {% else %}
-      <div style="width: 150px; height: 200px; display: inline-block;">
+      <div class="has-background-grey-light" style="width: 180px; height: 240px; display: inline-block;">
+        <figure class="image is-3by4">
       {% endif %}
-        <figure class="image has-background-grey-light">
           {% if page %}
           <a href="{% url 'page' page.id %}">
             <img src="{% static 'compare/thumbs/'|add:filename %}">
-            <figcaption style="position: absolute; top: 0; left: 0; padding: 2px 4px; background-color: rgba(255, 255, 255, 0.5);">{{ page.page }} {{ page.get_lr_display }}</figcaption>
+            <figcaption style="position: absolute; top: 0; left: 0; padding: 2px 4px; background-color: rgba(255, 255, 255, 0.6);">{{ page.page }} {{ page.get_lr_display }}</figcaption>
           </a>
           {% else %}
           <img src="{% static 'compare/thumbs/'|add:filename %}">
