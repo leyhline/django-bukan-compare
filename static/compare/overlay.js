@@ -167,6 +167,13 @@ function updateTargetResources(checkbox, targetimage, targetlink) {
         targetimage.src = "../match/" + pageId + "/" + targetId
         targetlink.text = "IIIF: " + targetBook + "-" + targetPage
         targetlink.href = "http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages=" + targetBook + "&pos=" + targetPage
+
+        const tbody = document.getElementById('matches')
+        const trow = document.getElementById('p' + targetId)
+        for (let i = 0; i < tbody.children.length; i++) {
+            tbody.children[i].classList.remove('is-selected')
+        }
+        trow.classList.add('is-selected')
     }
 }
 

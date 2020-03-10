@@ -46,15 +46,28 @@
           {% endif %}
         </div>
         <div class="column">
-          <form>
+          <table class="table is-narrow">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Pg</th>
+                <th>Scr</th>
+                <th>Book</th>
+                <th>Year</th>
+              </tr>
+            </thead>
+            <tbody id="matches">
             {% for page, nr_matches in matching %}
-            <label class="radio {% if nr_matches < 40%}has-text-grey{% endif %}">
-              <input type="radio" name="match" value="{{ page.id }},{{ page.book_id }},{{ page.page }}">
-              P. {{ page.page }} ({{ nr_matches }})
-              <a href="{% url 'page' page.id %}">▶</a>
-            </label><br>
+            <tr id="p{{ page.id }}">
+              <td><input type="radio" name="match" value="{{ page.id }},{{ page.book_id }},{{ page.page }}"></td>
+              <td>{{ page.page }}</td>
+              <td>{{ nr_matches }}</td>
+              <td>{{ page.book.original_id|slice:"-3:" }}</td>
+              <td>{{ page.book.published_ad }}</td>
+            </tr>
             {% endfor %}
-          </form>
+            </tbody>
+          </table>
         </div>
       </div>
       <div hidden>
