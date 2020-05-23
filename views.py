@@ -5,10 +5,6 @@ from django.contrib.staticfiles import finders
 
 from .models import Title, Book, Page, Match
 
-import io
-import cv2 as cv
-import numpy as np
-
 
 PAGE_FILENAME_TEMPLATE = "{book_id}/{book_id}_{page:0>5}_{lr}.jpg"
 THRESHOLD_NR_KEYPOINTS = 20
@@ -93,39 +89,39 @@ class PageView(generic.DetailView):
         return context
 
 
-def get_keypoints(src_page: Page, dst_page: Page):
-    src_dst_matches = Match.objects.filter(src_keypoint__page=src_page).filter(dst_keypoint__page=dst_page)
-    dst_src_matches = Match.objects.filter(src_keypoint__page=dst_page).filter(dst_keypoint__page=src_page)
-    src_dst_count = src_dst_matches.count()
-    dst_src_count = dst_src_matches.count()
-    assert (src_dst_count == 0) or (dst_src_count == 0)
-    assert (src_dst_count > 0) or (dst_src_count > 0)
-    if src_dst_count != 0:
-        return src_dst_matches.values_list('src_keypoint__x', 'src_keypoint__y', 'dst_keypoint__x', 'dst_keypoint__y')
-    else:
-        return dst_src_matches.values_list('dst_keypoint__x', 'dst_keypoint__y', 'src_keypoint__x', 'src_keypoint__y')
+# def get_keypoints(src_page: Page, dst_page: Page):
+#     src_dst_matches = Match.objects.filter(src_keypoint__page=src_page).filter(dst_keypoint__page=dst_page)
+#     dst_src_matches = Match.objects.filter(src_keypoint__page=dst_page).filter(dst_keypoint__page=src_page)
+#     src_dst_count = src_dst_matches.count()
+#     dst_src_count = dst_src_matches.count()
+#     assert (src_dst_count == 0) or (dst_src_count == 0)
+#     assert (src_dst_count > 0) or (dst_src_count > 0)
+#     if src_dst_count != 0:
+#         return src_dst_matches.values_list('src_keypoint__x', 'src_keypoint__y', 'dst_keypoint__x', 'dst_keypoint__y')
+#     else:
+#         return dst_src_matches.values_list('dst_keypoint__x', 'dst_keypoint__y', 'src_keypoint__x', 'src_keypoint__y')
 
 
-def create_warped_jpeg(keypoints: np.ndarray, image: np.ndarray):
-    assert keypoints.shape[1] == 4
-    homography, _ = cv.findHomography(keypoints[:,2:], keypoints[:,:2], 0)
-    height, width = image.shape
-    image_warped = cv.warpPerspective(image, homography, (width, height))
-    encoding_status, image_jpeg = cv.imencode(".jpg", image_warped, [cv.IMWRITE_JPEG_QUALITY, 80, cv.IMWRITE_JPEG_OPTIMIZE, True])
-    assert encoding_status
-    return image_jpeg
+# def create_warped_jpeg(keypoints: np.ndarray, image: np.ndarray):
+#     assert keypoints.shape[1] == 4
+#     homography, _ = cv.findHomography(keypoints[:,2:], keypoints[:,:2], 0)
+#     height, width = image.shape
+#     image_warped = cv.warpPerspective(image, homography, (width, height))
+#     encoding_status, image_jpeg = cv.imencode(".jpg", image_warped, [cv.IMWRITE_JPEG_QUALITY, 80, cv.IMWRITE_JPEG_OPTIMIZE, True])
+#     assert encoding_status
+#     return image_jpeg
 
 
-def matching_image(response, src_page_id, dst_page_id):
-    src_page = Page.objects.get(pk=src_page_id)
-    dst_page = Page.objects.get(pk=dst_page_id)
-    dst_filename = PAGE_FILENAME_TEMPLATE.format(book_id=dst_page.book_id, page=dst_page.page, lr=dst_page.lr)
-    dst_path = finders.find('compare/images/' + dst_filename)
-    dst_image = cv.imread(dst_path, cv.IMREAD_GRAYSCALE)
-    keypoints = np.array(get_keypoints(src_page, dst_page))
-    dst_image_jpeg = create_warped_jpeg(keypoints, dst_image)
-    r = FileResponse(io.BytesIO(dst_image_jpeg))
-    r['Content-Disposition'] = f'inline; filename="{dst_filename}"'
-    r['Content-Type'] = 'image/jpeg'
-    r['Content-Length'] = len(dst_image_jpeg)
-    return r
+# def matching_image(response, src_page_id, dst_page_id):
+#     src_page = Page.objects.get(pk=src_page_id)
+#     dst_page = Page.objects.get(pk=dst_page_id)
+#     dst_filename = PAGE_FILENAME_TEMPLATE.format(book_id=dst_page.book_id, page=dst_page.page, lr=dst_page.lr)
+#     dst_path = finders.find('compare/images/' + dst_filename)
+#     dst_image = cv.imread(dst_path, cv.IMREAD_GRAYSCALE)
+#     keypoints = np.array(get_keypoints(src_page, dst_page))
+#     dst_image_jpeg = create_warped_jpeg(keypoints, dst_image)
+#     r = FileResponse(io.BytesIO(dst_image_jpeg))
+#     r['Content-Disposition'] = f'inline; filename="{dst_filename}"'
+#     r['Content-Type'] = 'image/jpeg'
+#     r['Content-Length'] = len(dst_image_jpeg)
+#     return r
