@@ -74,8 +74,8 @@ class Feature(models.Model):
 
 class Match(models.Model):
     id = models.BigIntegerField(primary_key=True)
-    src_feature = models.ForeignKey(Feature, models.PROTECT, related_name='src_match')
-    dst_feature = models.ForeignKey(Feature, models.PROTECT, related_name='dst_match')
+    src_feature = models.ForeignKey(Feature, models.PROTECT, related_name='src_match', db_column='src_feature')
+    dst_feature = models.ForeignKey(Feature, models.PROTECT, related_name='dst_match', db_column='dst_feature')
 
     class Meta:
         managed = False
@@ -87,8 +87,8 @@ class Match(models.Model):
 
 class Pagepair(models.Model):
     id = models.BigIntegerField(primary_key=True)
-    first_page = models.ForeignKey(Page, models.PROTECT, related_name='first_pagepair')
-    second_page = models.ForeignKey(Page, models.PROTECT, related_name='second_pagepair')
+    first_page = models.ForeignKey(Page, models.PROTECT, related_name='first_pagepair', db_column='first_page')
+    second_page = models.ForeignKey(Page, models.PROTECT, related_name='second_pagepair', db_column='second_page')
     nr_matches = models.PositiveIntegerField()
     h11 = models.FloatField(blank=True, null=True)
     h12 = models.FloatField(blank=True, null=True)

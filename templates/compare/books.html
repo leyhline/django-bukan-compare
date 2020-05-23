@@ -4,16 +4,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>武鑑 BUKAN: {{ title.kanji }} {{ title.romanji|upper }}</title>
+    <title>武鑑 BUKAN</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
   </head>
   <body>
   <nav class="navbar" role="navigation">
     <div class="navbar-brand">
-      <a href="{% url 'titles' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
-      <span class="navbar-item">›</span>
-      <a href="{% url 'books' title.id %}" class="navbar-item"><ruby>{{ title.kanji }}<rt>{{ title.romanji|upper }}</rt></ruby></a>
+      <a href="{% url 'books' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
     </div>
   </nav>
     <div class="container">
@@ -23,22 +21,20 @@
             <th>ID</th>
             <th>Original ID</th>
             <th>Released</th>
-            <th>Classification</th>
+            <th>Title</th>
             <th colspan="2">Published</th>
-            <th>Aspect</th>
-            <th>Scans</th>
+            <th>Pages</th>
           </tr>
         </thead>
         <tbody>
-          {% for book in title.book_set.all %}
+          {% for book in object_list %}
           <tr>
             <td><a href="{% url 'pages' book.id %}">{{ book.id }}</a></td>
             <td>{{ book.original_id }}</td>
             <td>{{ book.released }}</td>
-            <td>{{ book.classification }}</td>
-            <td>{{ book.published }}</td>
-            <td>{{ book.published_ad }}</td>
-            <td>{{ book.aspect }}</td>
+            <td>{{ book.title }}</td>
+            <td>{{ book.era_year }}</td>
+            <td>{{ book.era_name }}</td>
             <td>{{ book.nr_scans }}</td>
           </tr>
           {% endfor %}

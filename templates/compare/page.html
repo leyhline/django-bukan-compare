@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>武鑑 BUKAN: PAGE {{ page.page }}</title>
+    <title>武鑑 BUKAN: PAGE {{ page.page }} {{ page.lr.decode }}</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
     <script>var pageId = {{ page.id }}</script>
@@ -13,13 +13,11 @@
   <body>
   <nav class="navbar" role="navigation">
     <div class="navbar-brand">
-      <a href="{% url 'titles' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
+      <a href="{% url 'books' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
       <span class="navbar-item">›</span>
-      <a href="{% url 'books' page.book.title.id %}" class="navbar-item"><ruby>{{ page.book.title.kanji }}<rt>{{ page.book.title.romanji|upper }}</rt></ruby></a>
+      <a href="{% url 'pages' page.book_id %}" class="navbar-item"><ruby>{{ page.book.original_id }}<rt>{{ page.book_id }}</rt></ruby></a>
       <span class="navbar-item">›</span>
-      <a href="{% url 'pages' page.book.id %}" class="navbar-item"><ruby>{{ page.book.original_id }}<rt>{{ page.book.id }}</rt></ruby></a>
-      <span class="navbar-item">›</span>
-      <a href="{% url 'page' page.id %}" class="navbar-item">PAGE {{ page.page }} {{ page.get_lr_display }}</a>
+      <a href="{% url 'page' page.id %}" class="navbar-item">PAGE {{ page.page }} {{ page.lr.decode }}</a>
     </div>
   </nav>
       <div class="columns is-vcentered is-gapless">
@@ -36,7 +34,7 @@
             <div class="column is-1">➠</div>
             <div class="column"><a id="targetlink" class="is-pulled-right" target="_blank"></a></div>
           </div>
-          <canvas id="overlay" width="{% if page.lr == 0 %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: medium solid lightgrey;"></canvas>
+          <canvas id="overlay" width="{% if page.lr.decode == "w" %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: medium solid lightgrey;"></canvas>
         </div>
         <div class="column">
           {% if previous %}
@@ -50,28 +48,26 @@
             <thead>
               <tr>
                 <th></th>
-                <th>Pg</th>
-                <th>Scr</th>
-                <th>Book</th>
-                <th>Year</th>
+                <th>1st</th>
+                <th>2nd</th>
+                <th>Count</th>
               </tr>
             </thead>
             <tbody id="matches">
-            {% for page, nr_matches in matching %}
+            {% for match in matches %}
             <tr id="p{{ page.id }}">
               <td><input type="radio" name="match" value="{{ page.id }},{{ page.book_id }},{{ page.page }}"></td>
-              <td>{{ page.page }}</td>
-              <td>{{ nr_matches }}</td>
-              <td>{{ page.book.original_id|slice:"-3:" }}</td>
-              <td>{{ page.book.published_ad }}</td>
+              <td>{{ match.first_page.book.id }}-{{ match.first_page.page }}</td>
+              <td>{{ match.second_page.book.id }}-{{ match.second_page.page }}</td>
+              <td>{{ match.nr_matches }}</td>
             </tr>
             {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
-      <div hidden>
-        <img src="{% static 'compare/images/'|add:filename %}" id="sourceimage">
+      <div>
+        <img src="{% static url %}" id="sourceimage">
         <img src="" id="targetimage">
       </div>
   </body>
