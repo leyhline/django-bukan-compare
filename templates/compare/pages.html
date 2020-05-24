@@ -9,14 +9,14 @@
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
   </head>
   <body>
-  <nav class="navbar" role="navigation">
-    <div class="navbar-brand">
-      <a href="{% url 'books' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
-      <span class="navbar-item">›</span>
-      <a href="{% url 'pages' book.id %}" class="navbar-item"><ruby>{{ book.original_id }}<rt>{{ book.id }}</rt></ruby></a>
-    </div>
-  </nav>
     <div class="container">
+      <nav class="navbar" role="navigation">
+        <div class="navbar-brand">
+          <a href="{% url 'books' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
+          <span class="navbar-item">›</span>
+          <a href="{% url 'pages' book.id %}" class="navbar-item"><ruby>{{ book.original_id }}<rt>{{ book.id }}</rt></ruby></a>
+        </div>
+      </nav>
       {% for page, url in pages %}
       {% if page.lr.decode == "w" %}
       <div class="has-background-grey-light" style="width: 240px; height: 160px; display: inline-block;">
@@ -32,6 +32,15 @@
         </figure>
       </div>
       {% endfor %}
+      <footer>
+        <div class="content has-text-left">
+          <p>
+            By <a href="mailto:leyht@informatik.uni-freiburg.de">Thomas Leyh</a> from the <a href="https://www.uni-freiburg.de/">University of Freiburg</a>
+            during an internship at the <a href="https://www.nii.ac.jp/">National Institute of Informatics</a> in Tokyo, 2020.
+            The <a href="https://github.com/leyhline/django-bukan-compare">source code</a> is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>. 
+          </p>
+        </div>
+      </footer>
     </div>
   </body>
 </html>
