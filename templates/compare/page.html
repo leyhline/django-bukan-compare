@@ -7,6 +7,7 @@
     <title>武鑑 BUKAN: PAGE {{ page.page }} {{ page.lr.decode }}</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma-tooltip.min.css' %}">
     <script>var pageId = {{ page.id }}</script>
     <script src="{% static 'compare/overlay.js' %}"></script>
   </head>
@@ -48,25 +49,27 @@
             <thead>
               <tr>
                 <th></th>
-                <th>1st</th>
-                <th>2nd</th>
-                <th>Count</th>
+                <th>Score</th>
+                <th colspan="2">Left</th>
+                <th colspan="2">Right</th>
               </tr>
             </thead>
             <tbody id="matches">
             {% for match in matches %}
-            <tr id="p{{ page.id }}">
-              <td><input type="radio" name="match" value="{{ page.id }},{{ page.book_id }},{{ page.page }}"></td>
-              <td>{{ match.first_page.book.id }}-{{ match.first_page.page }}</td>
-              <td>{{ match.second_page.book.id }}-{{ match.second_page.page }}</td>
+            <tr id="p{{ match.id }}">
+              <td><input type="radio" name="match" value="{{ match.id }}"></td>
               <td>{{ match.nr_matches }}</td>
+              <td data-tooltip="{{ match.first_page.book.original_id }} {{ match.first_page.book.title.kanji }} ({{ match.first_page.book.era_year }}{{ match.first_page.book.era_name }})"><a href="{% url 'pages' match.first_page.book.id %}">{{ match.first_page.book.id }}</a></td>
+              <td><a href="{% url 'page' match.first_page.id %}">{{ match.first_page.page }}</a></td>
+              <td data-tooltip="{{ match.second_page.book.original_id }} {{ match.second_page.book.title.kanji }} ({{ match.second_page.book.era_year }}{{ match.second_page.book.era_name }})"><a href="{% url 'pages' match.second_page.book.id %}">{{ match.second_page.book.id }}</a></td>
+              <td><a href="{% url 'page' match.second_page.id %}">{{ match.second_page.page }}</a></td>
             </tr>
             {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
-      <div>
+      <div hidden>
         <img src="{% static url %}" id="sourceimage">
         <img src="" id="targetimage">
       </div>

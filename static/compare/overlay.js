@@ -22,6 +22,7 @@ const fragmentShaderSource = `
     uniform sampler2D srcSampler;
     uniform bool uDstExists;
     uniform sampler2D dstSampler;
+    uniform mat3 uH;
     uniform float uRatio;
     float logistic_half(float x) {
         return 1.0 / (1.0+exp(-6.0 * (x-0.5)));
@@ -30,25 +31,33 @@ const fragmentShaderSource = `
         return 1.0 / (1.0+exp(-12.0 * (x-0.25)));
     }
     void main(void) {
-        vec2 texPos = vec2(vTex.x, vTex.y * -1. + 1.);
-        vec4 src = texture2D(srcSampler, texPos);
+        float x = vTex.x;
+        float y = vTex.y * -1. + 1.;
+        vec2 srcPos = vec2(x, y);
+        vec4 src = texture2D(srcSampler, srcPos);
         if (uDstExists) {
-            vec4 dst = texture2D(dstSampler, texPos);
+            vec2 dstPos = vec2((uH[0][0]*x+uH[0][1]*y+uH[0][2]) / (uH[2][0]*x+uH[2][1]*y+uH[2][2]),
+                               (uH[1][0]*x+uH[1][1]*y+uH[1][2]) / (uH[2][0]*x+uH[2][1]*y+uH[2][2]));
+            vec4 dst = texture2D(dstSampler, dstPos);
             float ratio_h =  logistic_half(uRatio);
             float ratio_q =  logistic_quarter(uRatio);
             float nratio_q = logistic_quarter(1.0 - uRatio);
+            float alpha = 1.0;
+            if (dstPos.x < 0. || dstPos.x > 1. || dstPos.y < 0. || dstPos.y > 1.) {
+                alpha = 0.;
+            }
             gl_FragColor = vec4(
                 ((1.0 - nratio_q) * dst.z) + (nratio_q * src.z),
                 (ratio_h * dst.y) + ((1.0 - ratio_h) * src.y),
                 (ratio_q * dst.x) + ((1.0 - ratio_q) * src.x),
-                1.0);
+                alpha);
         } else {
             gl_FragColor = src;
         }
     }
 `
 
-function initOverlay(gl, canvas, sourceimage, targetimage) {
+function initOverlay(gl, canvas, sourceimage, targetimage, homography) {
     const shaderProgram = initShaderProgram(gl, vertexShaderSource, fragmentShaderSource)
     gl.useProgram(shaderProgram)
     gl.viewport(0, 0, canvas.width, canvas.height)
@@ -70,6 +79,10 @@ function initOverlay(gl, canvas, sourceimage, targetimage) {
     } else {
         gl.uniform1i(dstExists, 0)
     }
+    const uHomography = gl.getUniformLocation(shaderProgram, 'uH')
+    homography[2] /= canvas.width
+    homography[5] /= canvas.height
+    gl.uniformMatrix3fv(uHomography, false, homography)
     // bind all the vertex buffers to their respective attributes
     bindBufferToVertexAttrib(gl, shaderProgram, vertexBuffer, 'aVertex')
     bindBufferToVertexAttrib(gl, shaderProgram, uvBuffer, 'aUV')
@@ -97,15 +110,6 @@ function initOverlay(gl, canvas, sourceimage, targetimage) {
             canvas.style['border-color'] = 'lightgrey'
         }
     }
-    targetimage.onload = () => { updateOverlay(gl, targetimage, dstExists, colorRatio) }
-}
-
-function updateOverlay(gl, image, dstExists, colorRatio) {
-    gl.uniform1f(colorRatio, 0.5)
-    gl.uniform1i(dstExists, 1)
-    gl.activeTexture(gl.TEXTURE1)
-    bindTexture(gl, image)
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
 }
 
 /**
@@ -161,34 +165,50 @@ function loadShader(gl, type, source) {
     return shader
 }
 
-function updateTargetResources(checkbox, targetimage, targetlink) {
-    if (checkbox.checked) {
-        const [targetId, targetBook, targetPage] = checkbox.value.split(',')
-        targetimage.src = "../match/" + pageId + "/" + targetId
-        targetlink.text = "IIIF: " + targetBook + "-" + targetPage
-        targetlink.href = "http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages=" + targetBook + "&pos=" + targetPage
+function loadImage(imageFilename, targetImgElement) {
+    return new Promise((resolve, reject) => {
+        targetImgElement.onload = resolve
+        targetImgElement.onerror = reject
+        targetImgElement.src = "/static/compare/image/" + imageFilename.slice(0, 9) + "/" + imageFilename
+    })
+}
 
-        const tbody = document.getElementById('matches')
-        const trow = document.getElementById('p' + targetId)
-        for (let i = 0; i < tbody.children.length; i++) {
-            tbody.children[i].classList.remove('is-selected')
-        }
-        trow.classList.add('is-selected')
+async function updateImages(pagepairId, sourceimage, sourcelink, targetimage, targetlink) {
+    const pagepairResponse = await fetch('/pagepair/' + pagepairId)
+    const pagepair = await pagepairResponse.json()
+    sourcelink.text = "IIIF: " + pagepair['firstbook'] + "-" + pagepair['firstpage']
+    sourcelink.href = "http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages=" + pagepair['firstbook'] + "&pos=" + pagepair['firstpage']
+    targetlink.text = "IIIF: " + pagepair['secondbook'] + "-" + pagepair['secondpage']
+    targetlink.href = "http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages=" + pagepair['secondbook'] + "&pos=" + pagepair['secondpage']
+    const firstPromise = loadImage(pagepair['first'], sourceimage)
+    const secondPromise = loadImage(pagepair['second'], targetimage)
+    await Promise.all([firstPromise, secondPromise])
+    return pagepair['homography']
+}
+
+function updateImagesOnChecked(checkbox, sourceimage, sourcelink, targetimage, targetlink, gl, canvas) {
+    if (checkbox.checked) {
+        updateImages(checkbox.value, sourceimage, sourcelink, targetimage, targetlink).then((homography) => {
+            initOverlay(gl, canvas, sourceimage, targetimage, homography)
+        })
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('load', () => {
     const canvas = document.getElementById('overlay')
     const gl = canvas.getContext('webgl')
     const sourceimage = document.getElementById('sourceimage')
     const targetimage = document.getElementById('targetimage')
+    const sourcelink = document.getElementById('sourcelink')
     const targetlink = document.getElementById('targetlink')
-    sourceimage.onload = () => { initOverlay(gl, canvas, sourceimage, targetimage) }
     const radioButtons = Array.from(document.getElementsByName('match'))
+    if (!radioButtons.map(button => button.checked).some(x => x === true)) {
+        initOverlay(gl, canvas, sourceimage, targetimage, [1, 1, 1, 1, 1, 1, 1, 1, 1])
+    }
     radioButtons.forEach(button => {
-        updateTargetResources(button, targetimage, targetlink)
+        updateImagesOnChecked(button, sourceimage, sourcelink, targetimage, targetlink, gl, canvas)
         button.onclick = (event) => {
-            updateTargetResources(event.target, targetimage, targetlink)
+            updateImagesOnChecked(button, sourceimage, sourcelink, targetimage, targetlink, gl, canvas)
         }
     })
 }, false)
