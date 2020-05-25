@@ -38,19 +38,20 @@ const fragmentShaderSource = `
         if (uDstExists) {
             vec2 dstPos = vec2((uH[0][0]*x+uH[0][1]*y+uH[0][2]) / (uH[2][0]*x+uH[2][1]*y+uH[2][2]),
                                (uH[1][0]*x+uH[1][1]*y+uH[1][2]) / (uH[2][0]*x+uH[2][1]*y+uH[2][2]));
-            vec4 dst = texture2D(dstSampler, dstPos);
+            vec4 dst;
+            if (dstPos.x < 0. || dstPos.x > 1. || dstPos.y < 0. || dstPos.y > 1.) {
+                dst = vec4(0.5);
+            } else {
+                dst = texture2D(dstSampler, dstPos);
+            }
             float ratio_h =  logistic_half(uRatio);
             float ratio_q =  logistic_quarter(uRatio);
             float nratio_q = logistic_quarter(1.0 - uRatio);
-            float alpha = 1.0;
-            if (dstPos.x < 0. || dstPos.x > 1. || dstPos.y < 0. || dstPos.y > 1.) {
-                alpha = 0.;
-            }
             gl_FragColor = vec4(
                 ((1.0 - nratio_q) * dst.z) + (nratio_q * src.z),
                 (ratio_h * dst.y) + ((1.0 - ratio_h) * src.y),
                 (ratio_q * dst.x) + ((1.0 - ratio_q) * src.x),
-                alpha);
+                1.);
         } else {
             gl_FragColor = src;
         }
