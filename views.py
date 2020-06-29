@@ -22,7 +22,7 @@ class BookPagesView(generic.DetailView):
     def get_context_data(self, **kwargs):
         book = super().get_object()
         context = super().get_context_data(**kwargs)
-        pages = book.page_set.all()
+        pages = book.page_set.order_by('page', '-lr')
         context['pages'] = [
             (page, THUMB_TEMPLATE.format(book_id=book.id, filename=page.filename))
             for page in pages]

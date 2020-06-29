@@ -7,6 +7,7 @@
     <title>武鑑 BUKAN: {{ book.original_id }}</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'compare/custom.css' %}">
   </head>
   <body>
     <div class="container">
@@ -17,21 +18,23 @@
           <a href="{% url 'pages' book.id %}" class="navbar-item"><ruby>{{ book.original_id }}<rt>{{ book.id }}</rt></ruby></a>
         </div>
       </nav>
+      <div style="overflow: hidden; max-width: 980px;">
       {% for page, url in pages %}
       {% if page.lr.decode == "w" %}
-      <div class="has-background-grey-light" style="width: 240px; height: 160px; display: inline-block;">
+      <div class="has-background-grey-light landscape">
         <figure class="image is-3by2">
       {% else %}
-      <div class="has-background-grey-light" style="width: 120px; height: 160px; display: inline-block;">
+      <div class="has-background-grey-light portrait">
         <figure class="image is-3by4">
       {% endif %}
         <a href="{% url 'page' page.id %}">
           <img src="{% static url %}">
-          <figcaption style="position: absolute; top: 0; left: 0; padding: 2px 4px; background-color: rgba(255, 255, 255, 0.6);">{{ page.page }} {{ page.lr.decode }})</figcaption>
+          <figcaption class="page">{{ page.page }} {% if page.lr.decode == "l" %}左{% elif page.lr.decode == "r" %}右{% endif %}</figcaption>
         </a>
         </figure>
       </div>
       {% endfor %}
+      </div>
       <footer>
         <div class="content has-text-left">
           <p>
