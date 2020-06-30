@@ -8,7 +8,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma-tooltip.min.css' %}">
-    <script>var pageId = {{ page.id }}</script>
+    <script>var pageId = {{ page.id }}; var staticRoot = '{% get_static_prefix %}';</script>
     <script src="{% static 'compare/overlay.js' %}"></script>
   </head>
   <body>
