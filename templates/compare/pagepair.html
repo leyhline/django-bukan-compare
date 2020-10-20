@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>武鑑 BUKAN: PAGE {{ page }} {{ lr }}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+    <script src="{% static 'compare/overlaypagepair.js' %}"></script>
+    <script>var homography = {{ homography }};</script>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar" role="navigation">
+        <div class="navbar-brand">
+          <a href="{% url 'books' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
+          <span class="navbar-item">›</span>
+          <span class="navbar-item">
+            <a href="{% url 'bookpairs' book1.id %}"><ruby>{{ book1.original_id }}⚯<rt>{{ book1.id }}</rt></ruby></a>
+            <a href="{% url 'bookpairs' book2.id %}"><ruby>{{ book2.original_id }}<rt>{{ book2.id }}</rt></ruby></a>
+          </span>
+          <span class="navbar-item">›</span>
+          <a href="{% url 'pagepair' main book1.id book2.id page lr %}" class="navbar-item">PAGE {{ page }} {{ lr }}</a>
+        </div>
+      </nav>
+      <div class="columns is-vcentered is-gapless">
+        <div class="column">
+          {% if next %}
+          <a href="{% url 'pagepair' main book1.id book2.id next.page lr %}" class="button is-link is-light is-pulled-right">ᐸ</a>
+          {% else %}
+          <a class="button is-link is-light is-pulled-right" disabled>ᐸ</a>
+          {% endif %}
+        </div>
+        <div class="column">
+          <div class="columns is-gapless is-marginless">
+            <div class="column"><a id="sourcelink" class="is-pulled-left" href="http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages={{ book1.id }}&pos={{ book1page.page }}" target="_blank">IIIF: {{ book1.id }}-{{ book1page.page }}</a></div>
+            <div class="column is-1">➠</div>
+            <div class="column"><a id="targetlink" class="is-pulled-right" href="http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages={{ book2.id }}&pos={{ book2page.page }}" target="_blank">IIIF: {{ book2.id }}-{{ book2page.page }}</a></div>
+          </div>
+          <canvas id="overlay" width="{% if page.lr.decode == "w" %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: medium solid lightgrey;"></canvas>
+        </div>
+        <div class="column">
+          {% if previous %}
+          <a href="{% url 'pagepair' main book1.id book2.id previous.page lr %}" class="button is-link is-light is-pulled-left">ᐳ</a>
+          {% else %}
+          <a class="button is-link is-light is-pulled-left" disabled>ᐳ</a>
+          {% endif %}
+        </div>
+      </div>
+      <div>
+        <img src="{% static book1pageurl %}" id="sourceimage" hidden>
+        <img src="{% static book2pageurl %}" id="targetimage" hidden>
+      </div>
+      <footer>
+        <div class="content has-text-left">
+          <p>
+            By <a href="mailto:leyht@informatik.uni-freiburg.de">Thomas Leyh</a> from the <a href="https://www.uni-freiburg.de/">University of Freiburg</a>
+            during an internship at the <a href="https://www.nii.ac.jp/">National Institute of Informatics</a> in Tokyo, 2020.
+            The <a href="https://github.com/leyhline/django-bukan-compare">source code</a> is licensed under the <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a>. 
+          </p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

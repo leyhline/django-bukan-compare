@@ -4,26 +4,24 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>武鑑 BUKAN</title>
+    <title>武鑑 BUKAN: {{ book.original_id }}⚯</title>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'compare/favicon.ico' %}" />
     <link rel="stylesheet" type="text/css" href="{% static 'compare/bulma.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'compare/custom.css' %}">
   </head>
   <body>
     <div class="container">
       <nav class="navbar" role="navigation">
         <div class="navbar-brand">
           <a href="{% url 'books' %}" class="navbar-item"><ruby>武鑑<rt>BUKAN</rt></ruby></a>
+          <span class="navbar-item">›</span>
+          <a href="{% url 'bookpairs' book.id %}" class="navbar-item"><ruby>{{ book.original_id }}⚯<rt>{{ book.id }}</rt></ruby></a>
         </div>
       </nav>
-      <div class="box">
-        <h4 class="title is-4">News</h4>
-        <p>―2020/10/20― Book comparison, using the <a style="font-weight: bold;">⚯</a> symbol on the main page.</p>
-      </div>
       <table class="table" id="table">
         <thead>
           <tr>
             <th>ID</th>
-            <th></th>
             <th>Original ID</th>
             <th>Title</th>
             <th>Pages</th>
@@ -32,16 +30,24 @@
           </tr>
         </thead>
         <tbody>
-          {% for book in object_list %}
-          <tr>
-            <td><a href="{% url 'pages' book.id %}">{{ book.id }}</a></td>
-            <td><a style="font-weight: bold;" href="{% url 'bookpairs' book.id %}">⚯</a></td>
+          <tr class="is-selected">
+            <td>{{ book.id }}</td>
             <td>{{ book.original_id }}</td>
             <td>{{ book.title }}</td>
-            <td>{% if book.pages_per_scan == 2 %}{{ book.nr_scans|add:book.nr_scans }}{% else %}{{ book.nr_scans }}{% endif %}</td>
+            <td class="is-success">{% if book.pages_per_scan == 2 %}{{ book.nr_scans|add:book.nr_scans }}{% else %}{{ book.nr_scans }}{% endif %}</td>
             <td>{{ book.era_year }}</td>
             <td>{{ book.era_name }}</td>
             <td>{{ book.released }}</td>
+          </tr>
+          {% for main, book1, book2, nr_pages in bookpairs %}
+          <tr>
+            <td><a href="{% url 'pagepair' main book1.id book2.id 1 'r' %}">{{ book1.id }}⚯{{ book2.id }}</a></td>
+            <td>{{ book2.original_id }}</td>
+            <td>{{ book2.title }}</td>
+            <td class="is-success">{{ nr_pages }}/{% if book2.pages_per_scan == 2 %}{{ book2.nr_scans|add:book2.nr_scans }}{% else %}{{ book2.nr_scans }}{% endif %}</td>
+            <td>{{ book2.era_year }}</td>
+            <td>{{ book2.era_name }}</td>
+            <td>{{ book2.released }}</td>
           </tr>
           {% endfor %}
         </tbody>
