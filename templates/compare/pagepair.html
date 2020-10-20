@@ -27,7 +27,7 @@
       <div class="columns is-vcentered is-gapless">
         <div class="column">
           {% if next %}
-          <a href="{% url 'pagepair' main book1.id book2.id next.page lr %}" class="button is-link is-light is-pulled-right">ᐸ</a>
+          <a href="{% url 'pagepair' main book1.id book2.id next.page next.lr.decode %}" class="button is-link is-light is-pulled-right">ᐸ</a>
           {% else %}
           <a class="button is-link is-light is-pulled-right" disabled>ᐸ</a>
           {% endif %}
@@ -42,7 +42,7 @@
         </div>
         <div class="column">
           {% if previous %}
-          <a href="{% url 'pagepair' main book1.id book2.id previous.page lr %}" class="button is-link is-light is-pulled-left">ᐳ</a>
+          <a href="{% url 'pagepair' main book1.id book2.id previous.page previous.lr.decode %}" class="button is-link is-light is-pulled-left">ᐳ</a>
           {% else %}
           <a class="button is-link is-light is-pulled-left" disabled>ᐳ</a>
           {% endif %}
