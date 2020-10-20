@@ -38,7 +38,7 @@
             <div class="column is-1">➠</div>
             <div class="column"><a id="targetlink" class="is-pulled-right" href="http://codh.rois.ac.jp/iiif/iiif-curation-viewer/index.html?pages={{ book2.id }}&pos={{ book2page.page }}" target="_blank">IIIF: {{ book2.id }}-{{ book2page.page }}</a></div>
           </div>
-          <canvas id="overlay" width="{% if page.lr.decode == "w" %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: medium solid lightgrey;"></canvas>
+          <canvas id="overlay" width="{% if lr == "w" %}990{% else %}495{% endif %}" height="660" class="has-background-grey-light" style="border: medium solid lightgrey;"></canvas>
         </div>
         <div class="column">
           {% if previous %}

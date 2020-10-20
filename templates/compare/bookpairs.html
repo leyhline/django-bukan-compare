@@ -41,7 +41,11 @@
           </tr>
           {% for main, book1, book2, nr_pages in bookpairs %}
           <tr>
+            {% if book.pages_per_scan == 2 %}
             <td><a href="{% url 'pagepair' main book1.id book2.id 1 'r' %}">{{ book1.id }}⚯{{ book2.id }}</a></td>
+            {% else %}
+            <td><a href="{% url 'pagepair' main book1.id book2.id 1 'w' %}">{{ book1.id }}⚯{{ book2.id }}</a></td>
+            {% endif %}
             <td>{{ book2.original_id }}</td>
             <td>{{ book2.title }}</td>
             <td class="is-success">{{ nr_pages }}/{% if book2.pages_per_scan == 2 %}{{ book2.nr_scans|add:book2.nr_scans }}{% else %}{{ book2.nr_scans }}{% endif %}</td>
