@@ -170,7 +170,7 @@ function loadImage(imageFilename, targetImgElement) {
     return new Promise((resolve, reject) => {
         targetImgElement.onload = resolve
         targetImgElement.onerror = reject
-        targetImgElement.src = staticRoot + "compare/image/" + imageFilename.slice(0, 9) + "/" + imageFilename
+        targetImgElement.src = staticRoot + "/compare/image/" + imageFilename.slice(0, 9) + "/" + imageFilename
     })
 }
 
