@@ -68,7 +68,7 @@ class Feature(models.Model):
         managed = False
         db_table = 'feature'
         constraints = [
-            models.UniqueConstraint(fields=['page', 'feature'], name='unique_feature')
+            models.UniqueConstraint(fields=['page', 'feature_nr'], name='unique_feature')
         ]
 
 
